@@ -15,8 +15,8 @@ const config = defineConfig({
     ...(!isVercel ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),
     tailwindcss(),
     tanstackStart(),
-    viteReact(),
     ...(isVercel ? [nitro()] : []),
+    viteReact(),
   ],
 })
 
