@@ -1,0 +1,42 @@
+name: Sync OpenCut Source
+
+on:
+  push:
+    paths:
+      - '.github/workflows/sync-opencut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone upstream OpenCut
+        run: |
+          git clone --depth=1 https://github.com/OpenCut-app/OpenCut.git /tmp/OpenCut
+
+      - name: Copy upstream source
+        run: |
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude '.github/workflows/sync-opencut.yml' \
+            /tmp/OpenCut/ ./
+
+      - name: Commit synced source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Sync source from OpenCut-app/OpenCut'
+          git push
